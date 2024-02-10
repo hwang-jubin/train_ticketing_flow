@@ -1,5 +1,6 @@
 package com.example.train_ticketing_flow.controller;
 
+import com.example.train_ticketing_flow.dto.AllowUserResponse;
 import com.example.train_ticketing_flow.dto.RegisterUserDto;
 import com.example.train_ticketing_flow.service.UserQueueService;
 import lombok.RequiredArgsConstructor;
@@ -25,4 +26,9 @@ public class UserQueueController {
         return userQueueService.RegisterWaitQue(queue,userId).map(i-> new RegisterUserDto(i));
     }
 
-}
+    @PostMapping("/allow")
+    public Mono<AllowUserResponse> allowUser(@RequestParam(name="queue",  defaultValue = "default") String queue,
+                                             @RequestParam(name = "count") Long count){
+        return userQueueService.allowUser(queue,count)
+                .map(allowed -> new AllowUserResponse(count, allowed));
+    }}
