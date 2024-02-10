@@ -46,4 +46,14 @@ public class UserQueueService {
                 .flatMap(member -> reactiveRedisTemplate.opsForZSet().add(User_Queue_Proceed_key.formatted(queue),member.getValue(),Instant.now().getEpochSecond()))
                 .count();
     }
+
+    /**
+     * 특정 회원이 진입이 가능한 상태인지 조회
+     * proceed sortedSet에 있어서 ranking 이 1 이상이면 진입 가능하다고 판단
+     */
+    public Mono<Boolean> isAllowed(final String queue, final Long userId){
+        return reactiveRedisTemplate.opsForZSet().rank(User_Queue_Proceed_key.formatted(queue),userId.toString())
+                .defaultIfEmpty(-1L)
+                .map(rank ->rank>=0);
+    }
 }
