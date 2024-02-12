@@ -32,10 +32,28 @@ public class UserQueueService {
                 .map(i->i>=0?i+1:i);
     }
 
-//    /**
-//     * 진입 허용 메서드
-//     *
-//     */
+    /**
+     * 진입 허용 메서드
+     * 1.진입이 가능한 상태인지 조회
+     * 2.진입을 허용
+     * count : 몇개의 사용자를 허용할 것인지?
+     */
+    public Mono<Long> allowUser(final String queue, final Long count){
+        //진입을 허용하는 단계
+        //1.wait queue 사용자를 제거
+        //2.proceed queue에 사용자를 추가(추가할 때, 진입 시간을 proceed로 넣는 시간으로 변경)
+        return reactiveRedisTemplate.opsForZSet().popMin(User_Queue_Wait_Key.formatted(queue), count)
+                .flatMap(member -> reactiveRedisTemplate.opsForZSet().add(User_Queue_Proceed_key.formatted(queue),member.getValue(),Instant.now().getEpochSecond()))
+                .count();
+    }
 
-
+    /**
+     * 특정 회원이 진입이 가능한 상태인지 조회
+     * proceed sortedSet에 있어서 ranking 이 1 이상이면 진입 가능하다고 판단
+     */
+    public Mono<Boolean> isAllowed(final String queue, final Long userId){
+        return reactiveRedisTemplate.opsForZSet().rank(User_Queue_Proceed_key.formatted(queue),userId.toString())
+                .defaultIfEmpty(-1L)
+                .map(rank ->rank>=0);
+    }
 }
