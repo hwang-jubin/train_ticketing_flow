@@ -2,6 +2,7 @@ package com.example.train_ticketing_flow.controller;
 
 import com.example.train_ticketing_flow.dto.AllowUserResponse;
 import com.example.train_ticketing_flow.dto.AllowedUserResponse;
+import com.example.train_ticketing_flow.dto.RankNumberResponse;
 import com.example.train_ticketing_flow.dto.RegisterUserDto;
 import com.example.train_ticketing_flow.service.UserQueueService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class UserQueueController {
     //등록 할 수 있는 API path
     @PostMapping("")
     public Mono<?> registerUser(@RequestParam(name = "queue", defaultValue = "default") String queue
-            ,@RequestParam(name = "user_id") Long userId){
+            ,@RequestParam(name = "user_Id") Long userId){
         return userQueueService.RegisterWaitQue(queue,userId).map(i-> new RegisterUserDto(i));
     }
 
@@ -37,7 +38,21 @@ public class UserQueueController {
         return userQueueService.isAllowed(queue, userId)
                 .map(bool -> new AllowedUserResponse(bool));
     }
-}
+
+    /**
+     * 몇번째 대기순번인지 확인하기
+     * @param queue
+     * @param userId
+     * @return
+     */
+    @GetMapping("/rank")
+    public Mono<RankNumberResponse> getRankUser(@RequestParam(name="queue",  defaultValue = "default") String queue,
+                                                 @RequestParam(name = "user_Id") Long userId){
+        return userQueueService.getRank(queue,userId)
+                .map(rank -> new RankNumberResponse(rank));
+
+
+    }}
 
 
 
