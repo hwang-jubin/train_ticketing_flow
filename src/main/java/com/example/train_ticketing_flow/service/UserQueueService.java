@@ -98,7 +98,4 @@ public class UserQueueService {
                 .doOnNext(tuple -> log.info("Tried %d and allowed %d members of %s queue".formatted(maxAllowUserCount, tuple.getT2(), tuple.getT1())))
                 .subscribe();
     }
-
-
-
 }
